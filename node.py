@@ -1,7 +1,9 @@
+import subprocess
+
 BLOCKCHAIN = []
 PRIVATE_SQS = ''
 LEDGER_SQS = ''
-BLOCKS_S3_BUCKET = ''
+BLOCKS_S3_BUCKET = ""
 PUBLIC_DNS = None
 
 
@@ -27,7 +29,22 @@ def get_public_DNS():
 
     :return: return public DNS of this local instance
     """
-    raise NotImplementedError
+    cmd = ['wget', '-qO-', 'http://instance-data/latest/meta-data/public-ipv4/']
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    o, _ = proc.communicate()
+
+    return o.decode('ascii')
+
+
+def instance_ID():
+    """
+    computes instance ID(sum of ip digits) for leader election purpose
+
+    :return: the id of the instance (sum of ip digits)
+    """
+    p_ip = get_public_DNS()
+    return sum([int(x) for x in p_ip.split('.')])
 
 
 def get_blockchain():

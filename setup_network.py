@@ -7,7 +7,7 @@ def init_blockchain():
     - s3 named blocks
     - Private SQS for each of the instances
     - SQS LEDGER named ledger
-
+    -
     :return:
     """
     raise NotImplemented
