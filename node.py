@@ -20,10 +20,6 @@ class Transaction:
         self.signed = True
 
 
-def leader_election():
-    raise NotImplementedError
-
-
 def get_public_DNS():
     """
 
@@ -36,8 +32,7 @@ def get_public_DNS():
 
     return o.decode('ascii')
 
-
-def instance_ID():
+def get_instance_ID():
     """
     computes instance ID(sum of ip digits) for leader election purpose
 
@@ -46,6 +41,40 @@ def instance_ID():
     p_ip = get_public_DNS()
     return sum([int(x) for x in p_ip.split('.')])
 
+
+def leader_election():
+    """
+        ##   Any process P can initiate an election
+
+        ##   P sends Election messages to all process with higher IDs
+            and awaits OK messages
+            –   If no OK messages, P becomes coordinator and sends
+                Coordinator messages to all processes with lower IDs
+
+            –   If it receives an OK, it drops out and waits for an Coordinator
+                message
+
+        ##   If a process receives an Election
+
+            –   Immediately sends Coordinator message if it is the process with
+                highest ID
+
+            –   Otherwise, returns an OK and starts an election
+
+        ##  If a process receives a Coordinator message, it treats
+            sender as the coordinator
+
+    :return:
+    """
+    '''
+        user_ip_list = get_all_users()
+        ranks = find_higher_ranks()
+        count_responses = 1
+        while count_responses < len(ranks):
+            response = send_election(get_instance_ID()) 
+            count_responses+=1
+    '''
+    raise NotImplementedError
 
 def get_blockchain():
     """
