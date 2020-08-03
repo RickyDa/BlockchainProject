@@ -8,6 +8,19 @@ PUBLIC_DNS = None
 
 
 # ************************* USER *************************
+
+def save_to_a_file(fileName,itemToSave):
+    try:
+        f = open(fileName, "w")
+        if isinstance(itemToSave, set):
+            for val in itemToSave:
+                print(val)
+                f.write("%s\n" % val)
+        f.close()
+    except Exception as e:
+        return "err in save_to_a_file function"
+
+
 class Transaction:
 
     def __init__(self, amount, from_user, to_user, signed=False):
@@ -76,14 +89,29 @@ def leader_election():
     '''
     raise NotImplementedError
 
+
 def get_blockchain():
     """
         Get all file names in the blocks (s3 Bucket) and sorting them.
-        and saving the sorted list into text file(blocks.txt)
-
+        Then, saving the sorted list into text file(blocks.txt)
     """
+    # TODO: extract all consts to another file and make the instance to read from it (not important for now)
+    bucketName = 'blocksblockchain'
+    fileBocketName = "blocks.txt"
+    blocks_set = set()
+    s3 = boto3.resource('s3')
+    # s3.Bucket(bucketName).download_file(fileNameToDownload, "downloadfile.txt")
+    s3_client = boto3.client('s3')
+    paginator = s3_client.get_paginator('list_objects_v2')
+    result = paginator.paginate(Bucket=bucketName)
+    for page in result:
+        if "Contents" in page:
+            for key in page["Contents"]:
+                keyString = key["Key"]
+                blocks_set.add(keyString.replace(".txt", ""))
+    save_to_a_file(fileBocketName, blocks_set)
+    return blocks_set
 
-    raise NotImplementedError
 
 
 def init_instance(name: str, ledger_name, blocks):
