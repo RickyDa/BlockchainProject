@@ -1,10 +1,11 @@
 import subprocess
 
-BLOCKCHAIN = []
-PRIVATE_SQS = ''
-LEDGER_SQS = ''
-BLOCKS_S3_BUCKET = ""
-PUBLIC_DNS = None
+BLOCKCHAIN = [] 
+PRIVATE_SQS = None # A reference to the private sqs
+LEDGER_SQS = 'ledger' # messaging where the signed transaction will be stored
+BLOCKS_S3_BUCKET = 'blocks' # name of the s3 bucket where the blocks(of transactions) are stored
+# PUBLIC_DNS = None
+TABLE_NAME = 'node' # name of the node table where all users and master will be stored
 
 
 # ************************* USER *************************
@@ -113,20 +114,52 @@ def get_blockchain():
     return blocks_set
 
 
-
-def init_instance(name: str, ledger_name, blocks):
+def create_sqs():
+	'''
+		Create the private sqs
+	'''
+    private_sqs_params = dict(
+      QueueName=f'{get_instance_ID()}.fifo',
+      Attributes={
+          'FifoQueue': 'True'
+      },
+    )
+    # Get the service resource
+    sqs = boto3.resource('sqs')
+    return sqs.create_queue(**private_sqs_params)    
+    
+def init_instance(ledger_name, blocks):
     """
-        Initialize PRIVATE_SQS with the provided name
+        Initialize PRIVATE_SQS
         save the instance Public DNS and the
         name of the SQS-Private on the DynamoDB and his role [LEADER,USER]
-         in the network
+        in the network
 
         :param blocks: name of the s3 bucket for blocks
         :param ledger_name: name of the SQS of the signed transactions
-        :param name : the SQS-private name
     """
+    PRIVATE_SQS = create_sqs()
+    while True:
+        try:
+            dynamodb = boto3.resource('dynamodb')
+            table = dynamodb.Table(table)
+            break
+        except:
+            time.sleep(5)
+            continue
+            
+    
+    response = table.put_item(
+           Item={
+                'node_id': str(get_instance_ID()),
+                'node_dns': get_public_DNS(),
+                'message_q': f'{get_instance_ID()}.fifo',
+                'role': 'user', # TODO: How to decide a nodes role
+            }
+        )
 
-    raise NotImplementedError
+    print(f'private sqs at:{PRIVATE_SQS.url}')
+    print('Node initialized')
 
 
 def update_blockchain(transation_name):
