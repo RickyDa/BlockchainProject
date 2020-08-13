@@ -34,26 +34,26 @@ class Transaction:
         self.signed = True
 
 
-def get_public_DNS():
-    """
+# def get_public_DNS():
+#     """
 
-    :return: return public DNS of this local instance
-    """
-    cmd = ['wget', '-qO-', 'http://instance-data/latest/meta-data/public-ipv4/']
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#     :return: return public DNS of this local instance
+#     """
+#     cmd = ['wget', '-qO-', 'http://instance-data/latest/meta-data/public-ipv4/']
+#     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    o, _ = proc.communicate()
+#     o, _ = proc.communicate()
 
-    return o.decode('ascii')
+#     return o.decode('ascii')
 
-def get_instance_ID():
-    """
-    computes instance ID(sum of ip digits) for leader election purpose
+# def get_instance_ID():
+#     """
+#     computes instance ID(sum of ip digits) for leader election purpose
 
-    :return: the id of the instance (sum of ip digits)
-    """
-    p_ip = get_public_DNS()
-    return sum([int(x) for x in p_ip.split('.')])
+#     :return: the id of the instance (sum of ip digits)
+#     """
+#     p_ip = get_public_DNS()
+#     return sum([int(x) for x in p_ip.split('.')])
 
 
 def leader_election():
@@ -114,52 +114,52 @@ def get_blockchain():
     return blocks_set
 
 
-def create_sqs():
-	'''
-		Create the private sqs
-	'''
-    private_sqs_params = dict(
-      QueueName=f'{get_instance_ID()}.fifo',
-      Attributes={
-          'FifoQueue': 'True'
-      },
-    )
-    # Get the service resource
-    sqs = boto3.resource('sqs')
-    return sqs.create_queue(**private_sqs_params)    
+# def create_sqs():
+# 	'''
+# 		Create the private sqs
+# 	'''
+#     private_sqs_params = dict(
+#       QueueName=f'{get_instance_ID()}.fifo',
+#       Attributes={
+#           'FifoQueue': 'True'
+#       },
+#     )
+#     # Get the service resource
+#     sqs = boto3.resource('sqs')
+#     return sqs.create_queue(**private_sqs_params)    
     
-def init_instance(ledger_name, blocks):
-    """
-        Initialize PRIVATE_SQS
-        save the instance Public DNS and the
-        name of the SQS-Private on the DynamoDB and his role [LEADER,USER]
-        in the network
+# def init_instance(ledger_name, blocks):
+#     """
+#         Initialize PRIVATE_SQS
+#         save the instance Public DNS and the
+#         name of the SQS-Private on the DynamoDB and his role [LEADER,USER]
+#         in the network
 
-        :param blocks: name of the s3 bucket for blocks
-        :param ledger_name: name of the SQS of the signed transactions
-    """
-    PRIVATE_SQS = create_sqs()
-    while True:
-        try:
-            dynamodb = boto3.resource('dynamodb')
-            table = dynamodb.Table(table)
-            break
-        except:
-            time.sleep(5)
-            continue
+#         :param blocks: name of the s3 bucket for blocks
+#         :param ledger_name: name of the SQS of the signed transactions
+#     """
+#     PRIVATE_SQS = create_sqs()
+#     while True:
+#         try:
+#             dynamodb = boto3.resource('dynamodb')
+#             table = dynamodb.Table(table)
+#             break
+#         except:
+#             time.sleep(5)
+#             continue
             
     
-    response = table.put_item(
-           Item={
-                'node_id': str(get_instance_ID()),
-                'node_dns': get_public_DNS(),
-                'message_q': f'{get_instance_ID()}.fifo',
-                'role': 'user', # TODO: How to decide a nodes role
-            }
-        )
+#     response = table.put_item(
+#            Item={
+#                 'node_id': str(get_instance_ID()),
+#                 'node_dns': get_public_DNS(),
+#                 'message_q': f'{get_instance_ID()}.fifo',
+#                 'role': 'user', # TODO: How to decide a nodes role
+#             }
+#         )
 
-    print(f'private sqs at:{PRIVATE_SQS.url}')
-    print('Node initialized')
+#     print(f'private sqs at:{PRIVATE_SQS.url}')
+#     print('Node initialized')
 
 
 def update_blockchain(transation_name):
