@@ -82,12 +82,14 @@ def register(table_name='nodes'):
     print(f'private sqs at:{TRANSACTION_SQS.url}')
     print('Node initialized')
 
+
 def init_instance():
     get_public_DNS()
     get_instance_ID()
     create_transaction_sqs()
     register()
     return PUBLIC_DNS, ID, TRANSACTION_SQS, TRANSACTION_SQS_NAME
+
 
 if __name__ == '__main__':
     get_public_DNS()

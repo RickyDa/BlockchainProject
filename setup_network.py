@@ -56,13 +56,13 @@ def create_ledger_sqs(name='ledger'):
     return sqs.create_queue(**private_sqs_params)
 
 
-
 N = 4
 # Amazon Linux 2 AMI (HVM), SSD Volume Type (My AMI)
 
 IMAGE_ID = 'ami-07e0b9cd44928fe2f'
 KEY_NAME = 'DSKey'
 SECURITY_GROUP = ['launch-wizard-6']
+
 
 def create_instances(num_instances):
     ec2 = boto3.resource('ec2')
@@ -97,8 +97,7 @@ def init_blockchain():
     create_nodes_db()
     # create_bucket('blockchain-utils')
     create_bucket('ds-blocks')
-    create_instances(num_instances=1)
-    
+    create_instances(num_instances=N)
 
 
 if __name__ == '__main__':
