@@ -64,16 +64,16 @@ def update_user(u_user: User):
     try:
         user = get_users_by_key(u_user.user_email)
 
-        if u_user.first_name is None:
+        if user.first_name != u_user.first_name:
             user.first_name = u_user.first_name
 
-        if u_user.last_name is None:
+        if user.last_name != u_user.last_name:
             user.last_name = u_user.last_name
 
-        if u_user.amount is None:
+        if user.amount != u_user.amount:
             user.amount = u_user.amount
 
-        if u_user.password is None:
+        if user.password != u_user.password:
             user.password = u_user.password
 
         create_user(user)
