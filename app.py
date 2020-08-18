@@ -25,7 +25,6 @@ def index():
 def login():
     key, pw = request.get_json()['user_email'].lower(), request.get_json()['password']
     user = uc.get_users_by_key(key)
-    print(type(pw), type(user.password))
     if pw == user.password:
         return Response(status=200)
     return Response(status=401)
@@ -33,3 +32,30 @@ def login():
 
 if __name__ == '__main__':
     app.run()
+
+# APP
+# Leader Election - ricky
+# Client side - login/ register, User API- dorel
+# Transaction API - itay
+# # Client side - transcation
+# master
+
+
+# Create user
+'''
+{
+	"user_email": "rickyrIckYY@mail.com",
+	"first_name":"ricky",
+	"last_name":"dani",
+	"ammount":3000,
+	"password": "123456789"
+}
+'''
+
+#login
+'''
+{
+    "user_email" : "ricky@gmail.com",
+    "password" : "1234567"
+}
+'''
