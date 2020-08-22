@@ -114,7 +114,7 @@ def login():
 ### The leader is the one the get not responses OR has the highest rank (ID)  ###
 https://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html
 """
-ID = "dorel"#get_instance_ID()
+ID = get_instance_ID()
 LEADER_ID = ''
 LEADER_DNS = ''
 
@@ -175,8 +175,8 @@ def elect():
 ############################# LEADER ELECTION ###################################
 """
 if __name__ == '__main__':
-    app.run( port=PORT, threaded=True)
-    #app.run(host='0.0.0.0', port=PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
+    #app.run( port=PORT, threaded=True)
+    app.run(host='0.0.0.0', port=PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
 # Leader Election - ricky Done.
