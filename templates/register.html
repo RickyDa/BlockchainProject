@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Register {% endblock %}</h1>
+
+      <hr/>
+      {%- for message in get_flashed_messages() %}
+         {{ message }}
+      {%- endfor %}
+
+
+<form action="http://localhost:5000/register" method="POST" class="regForm">
+    <div>
+        <label> Email </label>
+        <input type="text" name="user_email" value="{{request.form.user_email }}" />
+    </div>
+    <div>
+        <label> First Name </label>
+        <input type="text" name="first_name" value="{{request.form.first_name}}" />
+    </div>
+    <div>
+        <label> Last Name </label>
+        <input type="text" name="last_name" />
+    </div>
+    <div>
+        <label> Ammount </label>
+        <input type="text" name="ammount" value="{{request.form.ammount}}"/>
+    </div>
+    <div>
+        <label> Password </label>
+        <input type="text" name="password" value="{{request.form.password }}"/>
+    </div>
+    <div>
+        <input type="submit" value="submit" />
+    </div>
+
+</form>
+{% endblock %}

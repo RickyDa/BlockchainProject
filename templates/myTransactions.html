@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} My Transactions {% endblock %}</h1>
+<h2>Add new transaction</h2>
+<form action="http://localhost:5000/myTransactions" method="POST" class="regForm">
+
+    <div>
+        <label> Src </label>
+        <input type="text" name="src" value="{{request.form.src}}" />
+    </div>
+    <div>
+        <label> Dst </label>
+        <input type="text" name="dst" value="{{request.form.dst}}"/>
+    </div>
+    <div>
+    <label> Amount </label>
+    <input type="text" name="dst" value="{{request.form.amount}}"/>
+    </div>
+    <div>
+        <input type="submit" value="submit" />
+    </div>
+</form>
+<h2> My signed transactions </h2>
+<a href = "{{ url_for('my_transactions') }}"></a>
+ <table>
+         <thead>
+            <tr>
+                <th>SRC</th>
+                <th>DST</th>
+               <th>Amount</th>
+               <th>Signed</th>
+            </tr>
+         </thead>
+
+         <tbody>
+            {% for t in transactions %}
+               <tr>
+                   <td>{{ t.src }}</td>
+                   <td>{{ t.dst }}</td>
+                  <td>{{ t.amount }}</td>
+                  <td>{{ t.signed }}</td>>
+               </tr>
+            {% endfor %}
+         </tbody>
+      </table>
+
+
+{% endblock %}

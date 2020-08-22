@@ -1,0 +1,38 @@
+h1 {
+    color: brown;
+    text-align: center;
+    padding: 10px;
+}
+
+h2 {
+    border: 2px #eee solid;
+    color: brown;
+    padding: 10px;
+     font-size: 10px;
+}
+
+li {
+  color: #ff18c0;
+  font-size: 20px;
+  font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
+}
+
+.regForm {
+    padding:10px;
+}
+
+.regForm div label {
+        width:100px;
+}
+
+
+
+th, td {
+  padding: 15px;
+  text-align: left;
+    font-family: Arial,Helvetica Neue,Helvetica,sans-serif;
+}
+
+table {
+  border-collapse: collapse;
+}

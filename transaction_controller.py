@@ -52,6 +52,12 @@ def get_transaction_by_key(key):
     return convert_transaction(items[0])
 
 
+def get_sigh_transactions(user_email):
+    #TODO get all the transactions that user_email==src or user_email==dst && transaction.signed = True
+    mock_data = [Transaction("dorel@gamil.com", "ricky@gamil.com", 20, True)]
+    return mock_data
+
+
 def get_transactions_by_dst(dst):
     transactions = []
     dynamodb = boto3.resource('dynamodb')
