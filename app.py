@@ -10,6 +10,7 @@ PORT = 5000
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
@@ -17,7 +18,7 @@ def index():
             key, pw = request.form['user_email'].lower(), request.form['password']
             user = uc.get_users_by_key(key)
             if pw == user.password:
-                return Response(status=200)  # TODO render to my_transactions.html :)
+                return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(key))
             return Response(status=401)
         return render_template('index.html')
     except Exception as e:
@@ -98,7 +99,7 @@ def login():
                 return render_template('login.html')
             user = uc.get_users_by_key(key)
             if pw == user.password:
-                return Response(status=200)  # TODO render to my_transactions.html :)
+                return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(key))
             else:
                 flash('bad email or password')
                 return render_template('login.html')
