@@ -4,7 +4,7 @@ from utils import *
 import requests
 import user_controller as uc
 import transaction_controller as tc
-from  validation import *
+from validation import *
 
 PORT = 5000
 app = Flask(__name__)
@@ -29,8 +29,9 @@ def index():
 @app.route('/allusers', methods=['GET'])
 def users():
     try:
-        mock_data = [(uc.User(user_email="dorel@gamil.com",first_name= "dorel", last_name="shoshany", password="pass",amount=20))]
-        return render_template('showAllUser.html', users=mock_data) #uc.get_all_users())
+        mock_data = [(uc.User(user_email="dorel@gamil.com", first_name="dorel", last_name="shoshany", password="pass",
+                              amount=20))]
+        return render_template('showAllUser.html', users=mock_data)  # uc.get_all_users())
     except Exception as e:
         print(e)
         return Response(status=500)
@@ -43,8 +44,8 @@ def my_transactions():
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
             new_transaction = tc.Transaction(src=request.form['src'].lower(),
-                               dst=request.form['dst'],
-                               amount=request.form['amount'])
+                                             dst=request.form['dst'],
+                                             amount=request.form['amount'])
             tc.create_transaction(new_transaction)
             return render_template('myTransactions.html')
         return render_template('myTransactions.html', transactions=tc.get_sigh_transactions("dddd"))
@@ -59,13 +60,14 @@ def transactions_to_sign():
         if request.method == 'POST':
             return "ok", 200  # TODO: implement Sign transactions
         mock_data = [(tc.Transaction("ricky@gamil.com", "dorel@gamil.com", 20, False))]
-        return render_template('transactionsToSigh.html', transactions=mock_data)#transactions=tc.get_transactions_by_dst("dddd"))
+        return render_template('transactionsToSigh.html',
+                               transactions=mock_data)  # transactions=tc.get_transactions_by_dst("dddd"))
     except Exception as e:
         print(e)
         return Response(status=500)
 
 
-@app.route('/register', methods=['POST','GET'])
+@app.route('/register', methods=['POST', 'GET'])
 def register():
     try:
         if request.method == 'POST':
@@ -109,11 +111,11 @@ def login():
         return Response(status=500)
 
 
-
 """
-############################# LEADER ELECTION ###################################
-### The leader is the one the get not responses OR has the highest rank (ID)  ###
-https://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html
+################################## LEADER ELECTION ########################################
+########   The leader is the one gets no responses OR has the highest rank (ID)    ########
+###  https://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html  ###
+###########################################################################################
 """
 ID = get_instance_ID()
 LEADER_ID = ''
@@ -176,7 +178,7 @@ def elect():
 ############################# LEADER ELECTION ###################################
 """
 if __name__ == '__main__':
-    #app.run( port=PORT, threaded=True)
+    # app.run( port=PORT, threaded=True)
     app.run(host='0.0.0.0', port=PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
