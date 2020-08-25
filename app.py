@@ -1,10 +1,9 @@
 from flask import Flask, render_template, flash
 from flask import request, Response
-from utils import *
 import requests
-import user_controller as uc
-import transaction_controller as tc
-from validation import *
+from logic import user_controller as uc, transaction_controller as tc
+from utils.utils import *
+from utils.validation import ensure_email_validation
 
 PORT = 5000
 app = Flask(__name__)
