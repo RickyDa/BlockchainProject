@@ -121,6 +121,11 @@ LEADER_ID = ''
 LEADER_DNS = ''
 
 
+@app.route('/ping', methods=['GET'])
+def ping():
+    return Response(status=200)
+
+
 @app.route('/getleader', methods=['GET'])
 def get_leader():
     return {'LEADER_ID': str(LEADER_ID), 'LEADER_DNS': str(LEADER_DNS)}
@@ -178,6 +183,9 @@ def elect():
 """
 if __name__ == '__main__':
     # app.run( port=PORT, threaded=True)
+    # from scheduler import sched, add_block
+    # sched.add_job(add_block, 'interval', minutes=1)
+    # sched.start()
     app.run(host='0.0.0.0', port=PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
@@ -186,7 +194,7 @@ if __name__ == '__main__':
 #   User API- dorel
 #   Transaction API - itay
 #   Client side - transcation - almost done :)
-#   master
+#   master - Ricky
 
 
 # Create user
