@@ -173,15 +173,14 @@ def elect():
                                                                'PUBLIC_DNS': get_public_DNS()})
     return Response(status=200)
 
-
+from scheduler import sched, add_block
+sched.add_job(add_block, 'interval', minutes=1)
+sched.start()
 """
 ############################# LEADER ELECTION ###################################
 """
 if __name__ == '__main__':
     # app.run( port=PORT, threaded=True)
-    # from scheduler import sched, add_block
-    # sched.add_job(add_block, 'interval', minutes=1)
-    # sched.start()
     app.run(host='0.0.0.0', port=cfg.PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
