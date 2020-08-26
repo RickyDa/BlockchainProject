@@ -7,8 +7,8 @@ from botocore.exceptions import ClientError
 from datetime import datetime
 import re
 import time
-from app import ID, LEADER_ID, PORT, LEADER_DNS, elect
-
+from globals import cfg
+from utils.utils import  *
 TRANSACTION_LIMIT = 20
 Q_NAME = 'transactions'
 BUCKET_NAME = 'dsblocks'
@@ -57,7 +57,7 @@ def delete_transactions(tids):
 
 
 def add_block():
-    if ID == LEADER_ID:
+    if cfg.ID == cfg.LEADER_ID:
         sqs = boto3.resource('sqs')
         queue = sqs.get_queue_by_name(QueueName=Q_NAME)
 
@@ -84,11 +84,11 @@ def add_block():
             print("NO TRANSACTIONS")
     else:
         try:
-            rs = requests.get(f"http://{LEADER_DNS}:{PORT}/ping")
+            requests.get(f"http://{cfg.LEADER_DNS}:{cfg.PORT}/ping")
         except Exception as e:
             print(e)
             print('leader down, starting election')
-            elect()
+            requests.get(f"http://{get_public_DNS()}:{cfg.PORT}/elect")
 
 
 if __name__ == '__main__':

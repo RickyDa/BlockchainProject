@@ -4,8 +4,8 @@ import requests
 from logic import user_controller as uc, transaction_controller as tc
 from utils.utils import *
 from utils.validation import ensure_email_validation
+from globals import cfg
 
-PORT = 5000
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 
@@ -116,9 +116,6 @@ def login():
 ###  https://www.cs.colostate.edu/~cs551/CourseNotes/Synchronization/BullyExample.html  ###
 ###########################################################################################
 """
-ID = get_instance_ID()
-LEADER_ID = ''
-LEADER_DNS = ''
 
 
 @app.route('/ping', methods=['GET'])
@@ -128,16 +125,15 @@ def ping():
 
 @app.route('/getleader', methods=['GET'])
 def get_leader():
-    return {'LEADER_ID': str(LEADER_ID), 'LEADER_DNS': str(LEADER_DNS)}
+    return {'LEADER_ID': str(cfg.LEADER_ID), 'LEADER_DNS': str(cfg.LEADER_DNS)}
 
 
 @app.route('/leader', methods=['POST'])
 def assign_leader():
-    global LEADER_ID, LEADER_DNS
     imd = request.form
-    LEADER_ID = imd['leader']
-    LEADER_DNS = imd['PUBLIC_DNS']
-    print(f"The Leader is: ID - {LEADER_ID} on {LEADER_DNS}")
+    cfg.LEADER_ID = imd['leader']
+    cfg.LEADER_DNS = imd['PUBLIC_DNS']
+    print(f"The Leader is: ID - {cfg.LEADER_ID} on {cfg.LEADER_DNS}")
     return Response(status=200)
 
 
@@ -147,9 +143,9 @@ def broadcast(nodes, path, payload):
     for node in nodes:
         try:
             if path == 'leader':
-                requests.post(f"http://{node['DNS']}:{PORT}/{path}", data=payload)
+                requests.post(f"http://{node['DNS']}:{cfg.PORT}/{path}", data=payload)
             else:
-                requests.get(f"http://{node['DNS']}:{PORT}/{path}", data=payload)
+                requests.get(f"http://{node['DNS']}:{cfg.PORT}/{path}", data=payload)
             response_count += 1
         except Exception as e:
             print(e)
@@ -163,17 +159,17 @@ def elect():
     """
     if request.method == 'GET':
         nodes = get_instances()
-        higher_ranks = find_higher_ranks(nodes=nodes, my_rank=ID)
+        higher_ranks = find_higher_ranks(nodes=nodes, my_rank=cfg.ID)
         if len(higher_ranks) == 0:
             print('No higher ranks Im the leader')
-            broadcast(nodes=nodes, path="leader", payload={'leader': ID,
+            broadcast(nodes=nodes, path="leader", payload={'leader': cfg.ID,
                                                            'PUBLIC_DNS': get_public_DNS()})
         else:
             print('Wait for responses')
-            response_count = broadcast(nodes=higher_ranks, path="elect", payload={'leader': ID})
+            response_count = broadcast(nodes=higher_ranks, path="elect", payload={'leader': cfg.ID})
             if response_count == 0:
                 print('No responses Im the leader')
-                broadcast(nodes=nodes, path="leader", payload={'leader': ID,
+                broadcast(nodes=nodes, path="leader", payload={'leader': cfg.ID,
                                                                'PUBLIC_DNS': get_public_DNS()})
     return Response(status=200)
 
@@ -186,7 +182,7 @@ if __name__ == '__main__':
     # from scheduler import sched, add_block
     # sched.add_job(add_block, 'interval', minutes=1)
     # sched.start()
-    app.run(host='0.0.0.0', port=PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
+    app.run(host='0.0.0.0', port=cfg.PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
 # Leader Election - ricky Done.
