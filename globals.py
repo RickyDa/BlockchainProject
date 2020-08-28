@@ -6,6 +6,9 @@ class Config:
     LEADER_ID = ''
     LEADER_DNS = ''
     PORT = 5000
+    TRANSACTION_LIMIT = 20
+    Q_NAME = 'transactions'
+    BUCKET_NAME = 'dsblocks'
 
 
 cfg = Config()

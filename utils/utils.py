@@ -33,12 +33,11 @@ def get_instances():
 
     for res in response['Reservations']:
         for inst in res['Instances']:
-            print(inst['PublicDnsName'])
-            print(inst['PublicIpAddress'])
-            instances.append({'DNS': inst['PublicDnsName'],
-                              'Adress': inst['PublicIpAddress'],
-                              'ID': str(sum([int(x) for x in inst['PublicIpAddress'].split('.')]))
-                              })
+			if 'PublicIpAddress' in inst.keys():
+				instances.append({'DNS': inst['PublicDnsName'],
+								  'Adress': inst['PublicIpAddress'],
+								  'ID': str(sum([int(x) for x in inst['PublicIpAddress'].split('.')]))
+								  })
     return instances
 
 
