@@ -1,17 +1,18 @@
 import os
-
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
-import boto3
-from botocore.exceptions import ClientError
-from datetime import datetime
 import re
 import time
+import boto3
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from botocore.exceptions import ClientError
+from datetime import datetime
 from globals import cfg
-from utils.utils import  *
-TRANSACTION_LIMIT = 20
-Q_NAME = 'transactions'
-BUCKET_NAME = 'dsblocks'
+from utils.utils import *
+
+# TRANSACTION_LIMIT = 20
+# Q_NAME = 'transactions'
+# BUCKET_NAME = 'dsblocks'
 
 sched = BackgroundScheduler()
 
@@ -42,7 +43,7 @@ def upload_block(file_name, object_name=None):
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, BUCKET_NAME, object_name)
+        response = s3_client.upload_file(file_name, cfg.BUCKET_NAME, object_name)
     except ClientError as e:
         print(e)
         return False
@@ -59,13 +60,13 @@ def delete_transactions(tids):
 def add_block():
     if cfg.ID == cfg.LEADER_ID:
         sqs = boto3.resource('sqs')
-        queue = sqs.get_queue_by_name(QueueName=Q_NAME)
+        queue = sqs.get_queue_by_name(QueueName=cfg.Q_NAME)
 
         response = [0]
         message_count = 0
         block = []
 
-        while len(response) > 0 and message_count < TRANSACTION_LIMIT:
+        while len(response) > 0 and message_count < cfg.TRANSACTION_LIMIT:
             response = queue.receive_messages(MessageAttributeNames=['All'])
             for message in response:
 
@@ -94,12 +95,12 @@ def add_block():
 if __name__ == '__main__':
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
     try:
-        sched.add_job(tick, 'interval', minutes=1)
+        sched.add_job(tick, 'interval', seconds=10)
         sched.start()
-        # This is here to simulate application activity (which keeps the main thread alive).
         while True:
             time.sleep(2)
     except (KeyboardInterrupt, SystemExit):
-        print('cron down')
-        # Not strictly necessary if daemonic mode is enabled but should be done if possible
+        print('CRON TASK STOPPED')
         sched.shutdown()
+else:
+    sched.add_job(add_block, 'interval', minutes=1)

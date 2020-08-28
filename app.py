@@ -1,10 +1,11 @@
+import requests
 from flask import Flask, render_template, flash
 from flask import request, Response
-import requests
 from logic import user_controller as uc, transaction_controller as tc
 from utils.utils import *
 from utils.validation import ensure_email_validation
 from globals import cfg
+from scheduler import sched
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
@@ -173,14 +174,23 @@ def elect():
                                                                'PUBLIC_DNS': get_public_DNS()})
     return Response(status=200)
 
-from scheduler import sched, add_block
-sched.add_job(add_block, 'interval', minutes=1)
+
+# sched.add_job(add_block, 'interval', minutes=1)
 sched.start()
 """
 ############################# LEADER ELECTION ###################################
 """
+
+
+@app.route('/update_blocks', methods=['POST'])
+def update():
+    imd = request.form
+    with open("blocks.txt", "a") as f:
+        f.write(f"{str(imd['block'])}\n")
+    return Response(status=200)
+
+
 if __name__ == '__main__':
-    # app.run( port=PORT, threaded=True)
     app.run(host='0.0.0.0', port=cfg.PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
 
 # APP
@@ -190,6 +200,7 @@ if __name__ == '__main__':
 #   Transaction API - itay
 #   Client side - transcation - almost done :)
 #   master - Ricky
+#
 
 
 # Create user
