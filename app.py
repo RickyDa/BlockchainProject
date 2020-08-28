@@ -182,9 +182,9 @@ sched.start()
 """
 
 
-@app.route('/update_blocks', methods=['POST'])
+@app.route('/updateblocks', methods=['POST'])
 def update():
-    imd = request.form
+    imd = request.json
     with open("blocks.txt", "a") as f:
         f.write(f"{str(imd['block'])}\n")
     return Response(status=200)
