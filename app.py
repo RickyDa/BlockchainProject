@@ -4,7 +4,7 @@ from flask import request, Response
 from logic import user_controller as uc, transaction_controller as tc
 from utils.utils import *
 from utils.validation import ensure_email_validation
-from globals import cfg
+from globals import cfg, consts
 from scheduler import sched
 
 app = Flask(__name__)
@@ -12,15 +12,6 @@ app.secret_key = 'super secret key'
 user_logged_in = None
 user_email = None
 
-#TODO: move all consts to other python file
-
-MUST_LOGIN_MSG = 'You must login before you create/see your transactions!'
-EMAIL_MSG= 'The email is not valid'
-TRANSACTIONS_TABLE_MSG = 'Transactions Table not exist!'
-USER_TABLE_MSG = 'users table not exists or user logged in is not valid!'
-TRANSACTION_SIGNED_MSG= 'The transaction was signed!'
-TRANSACTION_CREATED_MSG = "Transaction created successfully"
-FAILED_LOGIN_MSG = 'bad email or password'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -52,21 +43,24 @@ def my_transactions():
         global user_email
         global user_logged_in
         if user_email is None:
-              flash(MUST_LOGIN_MSG)
+              flash(consts.MUST_LOGIN_MSG)
               return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         # if this is post -> create new one, if this is get -> just show all my transactions
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
             receiver_email = request.form['receiver_email']
             my_email = user_email
-            amount = request.form['amount']
-            new_transaction = tc.Transaction(my_email, receiver_email, 22)
+            amount = int(request.form['amount'])
+            if user_logged_in.amount < amount:
+               flash(consts.NOT_ENOUGH_AMOUNT)
+               return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
+            new_transaction = tc.Transaction(my_email, receiver_email, amount)
             save_transaction = tc.create_transaction(new_transaction)
             if save_transaction is None:
-                flash(TRANSACTIONS_TABLE_MSG)
+                flash(consts.TRANSACTIONS_TABLE_MSG)
             if user_logged_in is not None:
                 user_email = user_logged_in.user_email
-            flash(TRANSACTION_CREATED_MSG)
+            flash(consts.TRANSACTION_CREATED_MSG)
             return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
     except Exception as e:
@@ -82,18 +76,20 @@ def transactions_to_sign():
         if user_logged_in is not None:
             user_email = user_logged_in.user_email
         if user_email is None:
-          flash(MUST_LOGIN_MSG)
+          flash(consts.MUST_LOGIN_MSG)
           return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         transactions = tc.get_transactions_by_dst(user_email)
         if transactions is None:
-            flash(TRANSACTIONS_TABLE_MSG)
+            flash(consts.TRANSACTIONS_TABLE_MSG)
             return render_template('transactionsToSigh.html',
                                    transactions=transactions)
         if request.method == 'POST':
             transaction_id_from_request = request.form["t"]
             transaction_id = transaction_id_from_request.replace("transaction_id:", '')
-            tc.update_transaction_by_id(transaction_id)
-            flash(TRANSACTION_SIGNED_MSG)
+            transaction = tc.update_transaction_by_id(transaction_id)
+            tc.send_transaction(transaction)
+            uc.transfer_tokens(transaction.src, transaction.dst, transaction.amount)
+            flash(consts.TRANSACTION_SIGNED_MSG)
             return render_template('transactionsToSigh.html',
                                    transactions=tc.get_transactions_by_dst(user_email)) 
         return render_template('transactionsToSigh.html',
@@ -112,7 +108,7 @@ def register():
             user_email = request.form['user_email'].lower()
             email_is_valid = ensure_email_validation(user_email)
             if email_is_valid is False:
-                flash(EMAIL_MSG)
+                flash(consts.EMAIL_MSG)
                 return render_template('register.html')
             else:
                 new_user = uc.User(user_email=user_email,
@@ -124,7 +120,7 @@ def register():
                 if save_user is None:
                     flash('The users table is not exist')
                     return render_template('register.html')
-                return render_template('.html')
+                return render_template('register.html')
         return render_template('register.html')
     except Exception as e:
         print(e)
@@ -140,18 +136,18 @@ def login():
             key, pw = request.form['user_email'].lower(), request.form['password']
             email_is_valid = ensure_email_validation(key)
             if email_is_valid is False:
-                flash(EMAIL_MSG)
+                flash(consts.EMAIL_MSG)
                 return render_template('login.html')
             user = uc.get_users_by_key(key)
             if user is None:
-                flash(USER_TABLE_MSG)
+                flash(consts.USER_TABLE_MSG)
                 return render_template('login.html')
             if pw == user.password:
                 user_logged_in = user
                 user_email = user_logged_in.user_email
                 return render_template('myTransactions.html', transactions=[])  # tc.get_sigh_transactions(key))
             else:
-                flash(FAILED_LOGIN_MSG)
+                flash(consts.FAILED_LOGIN_MSG)
                 return render_template('login.html')
         return render_template('login.html')
     except Exception as e:

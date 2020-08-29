@@ -38,6 +38,16 @@ def convert_user(item):
     return User(user_email=user_email, first_name=first_name, last_name=last_name, amount=amount, password=password)
 
 
+def transfer_tokens(sender_email, reciver_email, amount):
+  sender_user = get_users_by_key(sender_email)
+  reciver_user = get_users_by_key(reciver_email)
+  sender_user.amount = sender_user.amount - amount
+  reciver_user.amount = reciver_user.amount + amount
+  update_user(sender_user)
+  update_user(reciver_user)
+  
+  
+
 def create_user(user):
     try:
         dynamodb = boto3.resource('dynamodb')

@@ -27,6 +27,41 @@ class Transaction:
                f'dst:{self.dst}, ' \
                f'amount:{self.amount}, ' \
                f'signed:{self.signed}'
+               
+    def serialize(self):
+      return dict(
+            transaction_id={
+                'StringValue': f'{self.transaction_id}',
+                'DataType': 'String'
+            },   
+            src={
+                'StringValue': f'{self.src}',
+                'DataType': 'String'
+            },
+            dst={
+                'StringValue': f'{self.dst}',
+                'DataType': 'String'
+            },
+            amount={
+                'StringValue': f'{self.amount}',
+                'DataType': 'Number'
+            }, 
+            signed={
+                'StringValue': f'{int(self.signed)}',
+                'DataType': 'Number'
+            }
+        )
+
+
+
+def send_transaction(transaction):
+  try:
+    sqs = boto3.resource('sqs')
+    queue = sqs.get_queue_by_name(QueueName=cfg.Q_NAME)
+    response = queue.send_message(MessageBody = f'transaction{transaction.transaction_id}',
+                                  MessageAttributes = transaction.serialize())
+  except ClientError as ce:
+    return None
 
 
 def convert_transaction(item):
@@ -95,10 +130,10 @@ def get_transactions_by_dst(dst):
 
 def update_transaction_by_id(transaction_id):
     transaction = get_transaction_by_key(transaction_id)
-    print(transaction)
     if not transaction.signed:
         transaction.signed = True
     create_transaction(transaction)
+    return transaction
 
 
 def update_transaction(other):
