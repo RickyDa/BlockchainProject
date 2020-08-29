@@ -1,5 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
+from globals import cfg
 
 """
 INITIALIZE: BLOCKCHAIN NETWORK
@@ -54,15 +55,15 @@ def create_bucket(bucket_name, region=None):
 
 
 if __name__ == "__main__":
-    queue_name = 'transactions'
+    queue_name = cfg.Q_NAME
 
     region = 'eu-central-1'
-    blocks_bucket = 'dsblocks'
+    blocks_bucket = cfg.BUCKET_NAME
 
-    transaction_table_name = 'transactions'
+    transaction_table_name = cfg.TRANSACTION_TABLE
     transaction_keys = [('transaction_id', 'HASH', 'S')]  # (COL_NAME, KEY_TYPE, ATTR_TYPE)
 
-    user_table_name = 'users'
+    user_table_name = cfg.USER_TABLE
     user_keys = [('user_email', 'HASH', 'S')]  # (COL_NAME, KEY_TYPE, ATTR_TYPE)
 
     create_db(user_table_name, user_keys)

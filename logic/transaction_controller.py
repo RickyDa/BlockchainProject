@@ -4,6 +4,7 @@ import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
+from globals import cfg
 
 
 class Transaction:
@@ -37,10 +38,10 @@ def convert_transaction(item):
     return Transaction(src=src, dst=dst, amount=amount, signed=signed, transaction_id=transaction_id)
 
 
-def create_transaction(transaction, table_name='transactions'):
+def create_transaction(transaction):
     try:
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(table_name)
+        table = dynamodb.Table(cfg.TRANSACTION_TABLE)
         return table.put_item(Item=transaction.__dict__)
     except ClientError as ce:
         return None
@@ -48,7 +49,7 @@ def create_transaction(transaction, table_name='transactions'):
 
 def get_transaction_by_key(key):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('transactions')
+    table = dynamodb.Table(cfg.TRANSACTION_TABLE)
     response = table.query(
         KeyConditionExpression=Key('transaction_id').eq(key)
     )
@@ -61,7 +62,7 @@ def get_sigh_transactions(user_email):
     # mock_data = [Transaction("dorel@gamil.com", "ricky@gamil.com", 20, True)]
     transactions = []
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('transactions')
+    table = dynamodb.Table(cfg.TRANSACTION_TABLE)
 
     response = table.scan(
         FilterExpression=(Attr('src').eq(user_email) | Attr('dst').eq(user_email)) & Attr('signed').eq(True)
@@ -77,7 +78,7 @@ def get_transactions_by_dst(dst):
     transactions = []
     try:
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('transactions')
+        table = dynamodb.Table(cfg.TRANSACTION_TABLE)
 
         response = table.scan(
             FilterExpression=Attr('dst').eq(dst) & Attr('signed').eq(False)
@@ -107,7 +108,7 @@ def update_transaction(other):
 
 def delete_transaction(key):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('transactions')
+    table = dynamodb.Table(cfg.TRANSACTION_TABLE)
     table.delete_item(
         Key={'transaction_id': key}
     )
