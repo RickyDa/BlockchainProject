@@ -3,9 +3,16 @@
 {% block content %}
 <h1>{% block title %} My Transactions {% endblock %}</h1>
 
+      {%- for message in get_flashed_messages() %}
+         {{ message }}
+      {%- endfor %}
+
 <h2> Transactions Waiting To Sign </h2>
+
+
 <a href = "{{ url_for('transactions_to_sign') }}"></a>
 
+      
  <table>
          <thead>
             <tr>
@@ -19,14 +26,14 @@
          <tbody>
             {% for t in transactions %}
                <tr>
-                   <td>{{ t.src }}</td>
-                   <td>{{ t.dst }}</td>
-                  <td>{{ t.amount }}</td>
-                  <td>{{ t.signed }}</td>>
+                   <td >{{ t.src }}</td>
+                   <td >{{ t.dst }}</td>
+                  <td >{{ t.amount }}</td>
+                  <td >{{ t.signed }}</td>>
                    <td>
                     <form action="/transactionsToSign" method="POST" class="regForm">
                         <div>
-                            <input type="submit" value="sigh" />
+                            <input type="submit" name="t" value={{t}} />
                         </div>
                     </form>
                    </td>

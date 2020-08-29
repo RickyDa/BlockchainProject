@@ -62,17 +62,29 @@ def get_sigh_transactions(user_email):
 
 
 def get_transactions_by_dst(dst):
-    transactions = []
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('transactions')
-
-    response = table.scan(
-        FilterExpression=Attr('dst').eq(dst) & Attr('signed').eq(False)
-    )
-
-    for item in response['Items']:
+  transactions = []
+  try:
+      dynamodb = boto3.resource('dynamodb')
+      table = dynamodb.Table('transactions')
+  
+      response = table.scan(
+          FilterExpression=Attr('dst').eq(dst) & Attr('signed').eq(False)
+      )
+      for item in response['Items']:
         transactions.append(convert_transaction(item))
+      else:
+        return transactions
+  except ClientError as ce:
     return transactions
+
+
+
+def update_transaction_by_id(transaction_id):
+    transaction = get_transaction_by_key(transaction_id)
+    print(transaction)
+    if transaction.signed != False:
+        transaction.signed = True
+    create_transaction(transaction)
 
 
 def update_transaction(other):

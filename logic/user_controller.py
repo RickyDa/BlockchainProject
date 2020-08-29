@@ -82,6 +82,8 @@ def get_users_by_key(key):
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('users')
     response = table.get_item(Key={'user_email': key})
+    if 'Item' not in response:
+      return None
     return convert_respons_to_user(response['Item'])
   except ClientError as ce:
     return None

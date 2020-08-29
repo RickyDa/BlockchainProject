@@ -10,7 +10,7 @@ from scheduler import sched
 app = Flask(__name__)
 app.secret_key = 'super secret key'
 user_logged_in = None
-
+user_email = None
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -39,20 +39,21 @@ def users():
 @app.route('/myTransactions', methods=['GET', 'POST'])
 def my_transactions():
     try:
-        user_email = None
+        global user_email
+        global user_logged_in
         # if this is post -> create new one, if this is get -> just show all my transactions
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
             receiver_email = request.form['receiver_email']
             my_email =  request.form['my_email']
+            amount =  request.form['amount']
             new_transaction = tc.Transaction(my_email,receiver_email,22)
             save_transaction = tc.create_transaction(new_transaction)
             if save_transaction is None:
                flash('Transactions Table not exist!')
-               #render_template('myTransactions.html',transactions=tc.get_sigh_transactions(user_email))
             if user_logged_in is not None:
                user_email = user_logged_in.user_email
-               return render_template('myTransactions.html',transactions=tc.get_sigh_transactions(user_email))
+            return render_template('myTransactions.html',transactions=tc.get_sigh_transactions(user_email))
         return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
     except Exception as e:
         print(e)
@@ -62,12 +63,24 @@ def my_transactions():
 @app.route('/transactionsToSign', methods=['GET', 'POST'])
 def transactions_to_sign():
     try:
-        user_email = None
-        if request.method == 'POST':
+        global user_email
+        global user_logged_in
+        if user_logged_in is not None:
+          user_email = user_logged_in.user_email
+        transactions=tc.get_transactions_by_dst(user_email)
+        if transactions is None:
+          flash('Transactions Table not exist!')
           return render_template('transactionsToSigh.html',
-                               transactions=tc.get_transactions_by_dst(user_email))  # TODO: implement Sign transactions
+                               transactions=transactions) 
+        if request.method == 'POST':
+          transaction_id_from_request = request.form["t"]
+          transaction_id = transaction_id_from_request.replace("transaction_id:",'')
+          print(transaction_id)
+          #tc.update_transaction_by_id(transaction_id)
+          return render_template('transactionsToSigh.html',
+                               transactions=transactions)  # TODO: implement Sign transactions
         return render_template('transactionsToSigh.html',
-                               transactions=tc.get_transactions_by_dst(user_email))
+                               transactions=transactions)
     except Exception as e:
         print(e)
         return Response(status=500)
@@ -76,6 +89,8 @@ def transactions_to_sign():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     try:
+        global user_logged_in
+        global user_email
         if request.method == 'POST':
             user_email = request.form['user_email'].lower()
             email_is_valid = ensure_email_validation(user_email)
@@ -92,7 +107,7 @@ def register():
                 if save_user is None:
                   flash('The users table is not exist')
                   return render_template('register.html')
-                return render_template('myTransactions.html')
+                return render_template('.html')
         return render_template('register.html')
     except Exception as e:
         print(e)
@@ -101,6 +116,8 @@ def register():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+    global user_logged_in
+    global user_email
     try:
         if request.method == 'POST':
             key, pw = request.form['user_email'].lower(), request.form['password']
@@ -110,11 +127,12 @@ def login():
                 return render_template('login.html')
             user = uc.get_users_by_key(key)
             if user is None:
-              flash('users table not exists')
-              return render_template('login.html')
+                flash('users table not exists or user is not valid!')
+                return render_template('login.html')
             if pw == user.password:
                 user_logged_in = user
-                return render_template('myTransactions.html', transactions=[])#tc.get_sigh_transactions(key))
+                user_email = user_logged_in.user_email
+                return render_template('myTransactions.html', transactions=[])  # tc.get_sigh_transactions(key))
             else:
                 flash('bad email or password')
                 return render_template('login.html')
