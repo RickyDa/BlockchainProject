@@ -79,7 +79,7 @@ def add_block():
         if message_count > 0:
             block_name, tids = transactions_to_file(block)
             upload_block(block_name)
-            delete_transactions(tids)
+            # delete_transactions(tids) # uncomment if u want to delete signed transactions
             print(f"{message_count} TRANSACTIONS SIGNED TO BLOCK")
         else:
             print("NO TRANSACTIONS")

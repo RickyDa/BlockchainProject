@@ -1,5 +1,3 @@
-
-
 import boto3
 from botocore.exceptions import ClientError
 
@@ -15,10 +13,10 @@ def create_nodes_db():
         table = dynamodb.create_table(
             TableName=TABLE_NAME,
             KeySchema=[{'AttributeName': k[0],
-                        'KeyType':k[1]} for k in KEYS],
+                        'KeyType': k[1]} for k in KEYS],
 
             AttributeDefinitions=[{'AttributeName': k[0],
-                                   'AttributeType':k[2]} for k in KEYS],
+                                   'AttributeType': k[2]} for k in KEYS],
 
             ProvisionedThroughput={
                 'ReadCapacityUnits': RW_CAPACITY,
