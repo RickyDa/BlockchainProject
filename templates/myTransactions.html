@@ -3,19 +3,23 @@
 {% block content %}
 <h1>{% block title %} My Transactions {% endblock %}</h1>
 <h2>Add new transaction</h2>
-<form action="http://localhost:5000/myTransactions" method="POST" class="regForm">
+<form action="/myTransactions" method="POST" class="regForm">
 
+      {%- for message in get_flashed_messages() %}
+         {{ message }}
+      {%- endfor %}
+      
     <div>
-        <label> Src </label>
-        <input type="text" name="src" value="{{request.form.src}}" />
+        <label> My Email </label>
+        <input type="text" name="my_email" value="{{request.form.my_email}}" />
     </div>
     <div>
-        <label> Dst </label>
-        <input type="text" name="dst" value="{{request.form.dst}}"/>
+        <label> Receiver Email </label>
+        <input type="text" name="receiver_email" value="{{request.form.receiver_email}}"/>
     </div>
     <div>
     <label> Amount </label>
-    <input type="text" name="dst" value="{{request.form.amount}}"/>
+    <input type="text" name="amount" value="{{request.form.amount}}"/>
     </div>
     <div>
         <input type="submit" value="submit" />

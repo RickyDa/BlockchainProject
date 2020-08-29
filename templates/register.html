@@ -9,7 +9,7 @@
       {%- endfor %}
 
 
-<form action="http://localhost:5000/register" method="POST" class="regForm">
+<form action="/register" method="POST" class="regForm">
     <div>
         <label> Email </label>
         <input type="text" name="user_email" value="{{request.form.user_email }}" />

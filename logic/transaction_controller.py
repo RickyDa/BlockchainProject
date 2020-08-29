@@ -3,7 +3,7 @@ from datetime import datetime
 import boto3
 import botocore
 from boto3.dynamodb.conditions import Key, Attr
-
+from botocore.exceptions import ClientError
 
 class Transaction:
 
@@ -37,9 +37,12 @@ def convert_transaction(item):
 
 
 def create_transaction(transaction, table_name='transactions'):
+  try:
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(table_name)
     return table.put_item(Item=transaction.__dict__)
+  except ClientError as ce:
+    return None
 
 
 def get_transaction_by_key(key):
