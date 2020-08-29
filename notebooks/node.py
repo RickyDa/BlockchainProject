@@ -14,7 +14,7 @@ TABLE_NAME = 'node'  # name of the node table where all users and master will be
 
 def save_to_a_file(fileName, itemToSave):
     try:
-        f = open(fileName, "a") # fixed mode from "w" to "a"
+        f = open(fileName, "a")  # fixed mode from "w" to "a"
         if isinstance(itemToSave, set):
             for val in itemToSave:
                 print(val)
@@ -73,7 +73,6 @@ def leader_election():
 
 
 def get_blockchain():
-    
     """
         Get all file names in the blocks (s3 Bucket) and sorting them.
         Then, saving the sorted list into text file(blocks.txt)

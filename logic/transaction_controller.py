@@ -5,6 +5,7 @@ import botocore
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 
+
 class Transaction:
 
     def __init__(self, src, dst, amount, signed=False, transaction_id=None):
@@ -30,19 +31,19 @@ class Transaction:
 def convert_transaction(item):
     amount = int(item['amount'])
     src = item['src']
-    trasanction_id = item['transaction_id']
+    transaction_id = item['transaction_id']
     dst = item['dst']
     signed = item['signed']
-    return Transaction(src=src, dst=dst, amount=amount, signed=signed, transaction_id=trasanction_id)
+    return Transaction(src=src, dst=dst, amount=amount, signed=signed, transaction_id=transaction_id)
 
 
 def create_transaction(transaction, table_name='transactions'):
-  try:
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(table_name)
-    return table.put_item(Item=transaction.__dict__)
-  except ClientError as ce:
-    return None
+    try:
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table(table_name)
+        return table.put_item(Item=transaction.__dict__)
+    except ClientError as ce:
+        return None
 
 
 def get_transaction_by_key(key):
@@ -56,33 +57,43 @@ def get_transaction_by_key(key):
 
 
 def get_sigh_transactions(user_email):
-    #TODO get all the transactions that user_email==src or user_email==dst && transaction.signed = True
-    mock_data = [Transaction("dorel@gamil.com", "ricky@gamil.com", 20, True)]
-    return mock_data
+    # TODO get all the transactions that user_email==src or user_email==dst && transaction.signed = True
+    # mock_data = [Transaction("dorel@gamil.com", "ricky@gamil.com", 20, True)]
+    transactions = []
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('transactions')
+
+    response = table.scan(
+        FilterExpression=(Attr('src').eq(user_email) | Attr('dst').eq(user_email)) & Attr('signed').eq(True)
+    )
+
+    for item in response['Items']:
+        transactions.append(convert_transaction(item))
+
+    return transactions
 
 
 def get_transactions_by_dst(dst):
-  transactions = []
-  try:
-      dynamodb = boto3.resource('dynamodb')
-      table = dynamodb.Table('transactions')
-  
-      response = table.scan(
-          FilterExpression=Attr('dst').eq(dst) & Attr('signed').eq(False)
-      )
-      for item in response['Items']:
-        transactions.append(convert_transaction(item))
-      else:
-        return transactions
-  except ClientError as ce:
-    return transactions
+    transactions = []
+    try:
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('transactions')
 
+        response = table.scan(
+            FilterExpression=Attr('dst').eq(dst) & Attr('signed').eq(False)
+        )
+        for item in response['Items']:
+            transactions.append(convert_transaction(item))
+        else:
+            return transactions
+    except ClientError as ce:
+        return transactions
 
 
 def update_transaction_by_id(transaction_id):
     transaction = get_transaction_by_key(transaction_id)
     print(transaction)
-    if transaction.signed != False:
+    if not transaction.signed:
         transaction.signed = True
     create_transaction(transaction)
 

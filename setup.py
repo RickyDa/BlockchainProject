@@ -9,16 +9,17 @@ INITIALIZE: BLOCKCHAIN NETWORK
 - 1 S3 BUCKET
 """
 
-def create_db(table_name,keys):
+
+def create_db(table_name, keys):
     dynamodb = boto3.resource('dynamodb')
     try:
         table = dynamodb.create_table(
             TableName=table_name,
             KeySchema=[{'AttributeName': k[0],
-                        'KeyType':k[1]} for k in keys],
+                        'KeyType': k[1]} for k in keys],
 
             AttributeDefinitions=[{'AttributeName': k[0],
-                                   'AttributeType':k[2]} for k in keys],
+                                   'AttributeType': k[2]} for k in keys],
 
             ProvisionedThroughput={
                 'ReadCapacityUnits': 10,
@@ -29,13 +30,13 @@ def create_db(table_name,keys):
     except dynamodb.meta.client.exceptions.ResourceInUseException:
         print(f'{table_name} DB Already exists')
         return dynamodb.Table(table_name)
-    
-    
+
+
 def create_sqs(name):
     sqs = boto3.resource('sqs')
     return sqs.create_queue(QueueName=name)
 
-     
+
 def create_bucket(bucket_name, region=None):
     try:
         if region is None:
@@ -59,11 +60,11 @@ if __name__ == "__main__":
     blocks_bucket = 'dsblocks'
 
     transaction_table_name = 'transactions'
-    transaction_keys = [('transaction_id','HASH','S')] # (COL_NAME, KEY_TYPE, ATTR_TYPE)
+    transaction_keys = [('transaction_id', 'HASH', 'S')]  # (COL_NAME, KEY_TYPE, ATTR_TYPE)
 
     user_table_name = 'users'
-    user_keys = [('user_email','HASH','S')] # (COL_NAME, KEY_TYPE, ATTR_TYPE)
-    
+    user_keys = [('user_email', 'HASH', 'S')]  # (COL_NAME, KEY_TYPE, ATTR_TYPE)
+
     create_db(user_table_name, user_keys)
     create_db(transaction_table_name, transaction_keys)
     create_bucket(blocks_bucket, region)

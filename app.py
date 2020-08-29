@@ -12,6 +12,7 @@ app.secret_key = 'super secret key'
 user_logged_in = None
 user_email = None
 
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     try:
@@ -45,15 +46,15 @@ def my_transactions():
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
             receiver_email = request.form['receiver_email']
-            my_email =  request.form['my_email']
-            amount =  request.form['amount']
-            new_transaction = tc.Transaction(my_email,receiver_email,22)
+            my_email = request.form['my_email']
+            amount = request.form['amount']
+            new_transaction = tc.Transaction(my_email, receiver_email, 22)
             save_transaction = tc.create_transaction(new_transaction)
             if save_transaction is None:
-               flash('Transactions Table not exist!')
+                flash('Transactions Table not exist!')
             if user_logged_in is not None:
-               user_email = user_logged_in.user_email
-            return render_template('myTransactions.html',transactions=tc.get_sigh_transactions(user_email))
+                user_email = user_logged_in.user_email
+            return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
     except Exception as e:
         print(e)
@@ -66,19 +67,19 @@ def transactions_to_sign():
         global user_email
         global user_logged_in
         if user_logged_in is not None:
-          user_email = user_logged_in.user_email
-        transactions=tc.get_transactions_by_dst(user_email)
+            user_email = user_logged_in.user_email
+        transactions = tc.get_transactions_by_dst(user_email)
         if transactions is None:
-          flash('Transactions Table not exist!')
-          return render_template('transactionsToSigh.html',
-                               transactions=transactions) 
+            flash('Transactions Table not exist!')
+            return render_template('transactionsToSigh.html',
+                                   transactions=transactions)
         if request.method == 'POST':
-          transaction_id_from_request = request.form["t"]
-          transaction_id = transaction_id_from_request.replace("transaction_id:",'')
-          print(transaction_id)
-          #tc.update_transaction_by_id(transaction_id)
-          return render_template('transactionsToSigh.html',
-                               transactions=transactions)  # TODO: implement Sign transactions
+            transaction_id_from_request = request.form["t"]
+            transaction_id = transaction_id_from_request.replace("transaction_id:", '')
+            print(transaction_id)
+            # tc.update_transaction_by_id(transaction_id)
+            return render_template('transactionsToSigh.html',
+                                   transactions=transactions)  # TODO: implement Sign transactions
         return render_template('transactionsToSigh.html',
                                transactions=transactions)
     except Exception as e:
@@ -105,8 +106,8 @@ def register():
                                    password=request.form['password'])
                 save_user = uc.create_user(new_user)
                 if save_user is None:
-                  flash('The users table is not exist')
-                  return render_template('register.html')
+                    flash('The users table is not exist')
+                    return render_template('register.html')
                 return render_template('.html')
         return render_template('register.html')
     except Exception as e:
