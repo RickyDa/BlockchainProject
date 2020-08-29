@@ -12,6 +12,15 @@ app.secret_key = 'super secret key'
 user_logged_in = None
 user_email = None
 
+#TODO: move all consts to other python file
+
+MUST_LOGIN_MSG = 'You must login before you create/see your transactions!'
+EMAIL_MSG= 'The email is not valid'
+TRANSACTIONS_TABLE_MSG = 'Transactions Table not exist!'
+USER_TABLE_MSG = 'users table not exists or user logged in is not valid!'
+TRANSACTION_SIGNED_MSG= 'The transaction was signed!'
+TRANSACTION_CREATED_MSG = "Transaction created successfully"
+FAILED_LOGIN_MSG = 'bad email or password'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -42,18 +51,22 @@ def my_transactions():
     try:
         global user_email
         global user_logged_in
+        if user_email is None:
+              flash(MUST_LOGIN_MSG)
+              return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         # if this is post -> create new one, if this is get -> just show all my transactions
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
             receiver_email = request.form['receiver_email']
-            my_email = request.form['my_email']
+            my_email = user_email
             amount = request.form['amount']
             new_transaction = tc.Transaction(my_email, receiver_email, 22)
             save_transaction = tc.create_transaction(new_transaction)
             if save_transaction is None:
-                flash('Transactions Table not exist!')
+                flash(TRANSACTIONS_TABLE_MSG)
             if user_logged_in is not None:
                 user_email = user_logged_in.user_email
+            flash(TRANSACTION_CREATED_MSG)
             return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
     except Exception as e:
@@ -68,18 +81,21 @@ def transactions_to_sign():
         global user_logged_in
         if user_logged_in is not None:
             user_email = user_logged_in.user_email
+        if user_email is None:
+          flash(MUST_LOGIN_MSG)
+          return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         transactions = tc.get_transactions_by_dst(user_email)
         if transactions is None:
-            flash('Transactions Table not exist!')
+            flash(TRANSACTIONS_TABLE_MSG)
             return render_template('transactionsToSigh.html',
                                    transactions=transactions)
         if request.method == 'POST':
             transaction_id_from_request = request.form["t"]
             transaction_id = transaction_id_from_request.replace("transaction_id:", '')
-            print(transaction_id)
-            # tc.update_transaction_by_id(transaction_id)
+            tc.update_transaction_by_id(transaction_id)
+            flash(TRANSACTION_SIGNED_MSG)
             return render_template('transactionsToSigh.html',
-                                   transactions=transactions)  # TODO: implement Sign transactions
+                                   transactions=tc.get_transactions_by_dst(user_email)) 
         return render_template('transactionsToSigh.html',
                                transactions=transactions)
     except Exception as e:
@@ -96,7 +112,7 @@ def register():
             user_email = request.form['user_email'].lower()
             email_is_valid = ensure_email_validation(user_email)
             if email_is_valid is False:
-                flash('The email is not valid')
+                flash(EMAIL_MSG)
                 return render_template('register.html')
             else:
                 new_user = uc.User(user_email=user_email,
@@ -124,18 +140,18 @@ def login():
             key, pw = request.form['user_email'].lower(), request.form['password']
             email_is_valid = ensure_email_validation(key)
             if email_is_valid is False:
-                flash('The email is not valid')
+                flash(EMAIL_MSG)
                 return render_template('login.html')
             user = uc.get_users_by_key(key)
             if user is None:
-                flash('users table not exists or user is not valid!')
+                flash(USER_TABLE_MSG)
                 return render_template('login.html')
             if pw == user.password:
                 user_logged_in = user
                 user_email = user_logged_in.user_email
                 return render_template('myTransactions.html', transactions=[])  # tc.get_sigh_transactions(key))
             else:
-                flash('bad email or password')
+                flash(FAILED_LOGIN_MSG)
                 return render_template('login.html')
         return render_template('login.html')
     except Exception as e:

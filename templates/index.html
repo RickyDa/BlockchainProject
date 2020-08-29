@@ -2,6 +2,11 @@
 
 {% block content %}
     <h1>{% block title %} Welcome to Blockchain {% endblock %}</h1>
+    
+    {%- for message in get_flashed_messages() %}
+         {{ message }}
+      {%- endfor %}
+    
 <form action="/login" method="POST" class="regForm">
     <div>
         <label> Email </label>

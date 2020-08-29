@@ -59,18 +59,20 @@ def get_transaction_by_key(key):
 
 def get_sigh_transactions(user_email):
     # TODO get all the transactions that user_email==src or user_email==dst && transaction.signed = True
-    # mock_data = [Transaction("dorel@gamil.com", "ricky@gamil.com", 20, True)]
-    transactions = []
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(cfg.TRANSACTION_TABLE)
-
-    response = table.scan(
-        FilterExpression=(Attr('src').eq(user_email) | Attr('dst').eq(user_email)) & Attr('signed').eq(True)
-    )
-
-    for item in response['Items']:
-        transactions.append(convert_transaction(item))
-
+  transactions = []
+  try:
+      dynamodb = boto3.resource('dynamodb')
+      table = dynamodb.Table(cfg.TRANSACTION_TABLE)
+  
+      response = table.scan(
+          FilterExpression=(Attr('src').eq(user_email) | Attr('dst').eq(user_email)) & Attr('signed').eq(True)
+      )
+  
+      for item in response['Items']:
+          transactions.append(convert_transaction(item))
+  
+      return transactions
+  except ClientError as ce:
     return transactions
 
 

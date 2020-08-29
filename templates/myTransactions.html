@@ -2,12 +2,15 @@
 
 {% block content %}
 <h1>{% block title %} My Transactions {% endblock %}</h1>
-<h2>Add new transaction</h2>
-<form action="/myTransactions" method="POST" class="regForm">
 
       {%- for message in get_flashed_messages() %}
          {{ message }}
       {%- endfor %}
+
+<br></br>
+<h2>Add new transaction</h2>
+<form action="/myTransactions" method="POST" class="regForm">
+
       
     <div>
         <label> My Email </label>
