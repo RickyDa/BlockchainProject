@@ -1,6 +1,7 @@
 import boto3
 import botocore
 from botocore.exceptions import ClientError
+from globals import cfg
 
 
 class User:
@@ -37,10 +38,10 @@ def convert_user(item):
     return User(user_email=user_email, first_name=first_name, last_name=last_name, amount=amount, password=password)
 
 
-def create_user(user, table_name='users'):
+def create_user(user):
     try:
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(table_name)
+        table = dynamodb.Table(cfg.USER_TABLE)
         return table.put_item(Item=user.__dict__)
     except ClientError as ce:
         return None
@@ -50,7 +51,7 @@ def get_all_users():
     users = []
     try:
         dynamo_client = boto3.client('dynamodb')
-        resp = dynamo_client.scan(TableName='users')
+        resp = dynamo_client.scan(TableName=cfg.USER_TABLE)
 
         for item in resp['Items']:
             users.append(convert_user(item))
@@ -80,7 +81,7 @@ def convert_respons_to_user(item):
 def get_users_by_key(key):
     try:
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('users')
+        table = dynamodb.Table(cfg.USER_TABLE)
         response = table.get_item(Key={'user_email': key})
         if 'Item' not in response:
             return None
@@ -115,7 +116,7 @@ def update_user(u_user: User):
 
 def delete_user(key):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('users')
+    table = dynamodb.Table(cfg.USER_TABLE)
     table.delete_item(
         Key={'user_email': key}
     )

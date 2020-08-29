@@ -52,7 +52,7 @@ def upload_block(file_name, object_name=None):
 
 def delete_transactions(tids):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('transactions')
+    table = dynamodb.Table(cfg.TRANSACTION_TABLE)
     for tid in tids:
         table.delete_item(Key={'transaction_id': tid})
 
