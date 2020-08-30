@@ -36,6 +36,16 @@ def users():
         print(e)
         return Response(status=500)
 
+@app.route('/getState', methods=['GET'])
+def getState():
+    try:
+        if request.method == 'GET':
+            Response.data = cfg.config_to_json()
+            return Response.data
+    except Exception as e:
+        print(e)
+        return Response(status=500)
+
 
 @app.route('/myTransactions', methods=['GET', 'POST'])
 def my_transactions():
@@ -91,7 +101,7 @@ def transactions_to_sign():
             uc.transfer_tokens(transaction.src, transaction.dst, transaction.amount)
             flash(consts.TRANSACTION_SIGNED_MSG)
             return render_template('transactionsToSigh.html',
-                                   transactions=tc.get_transactions_by_dst(user_email)) 
+                                   transactions=tc.get_transactions_by_dst(user_email))
         return render_template('transactionsToSigh.html',
                                transactions=transactions)
     except Exception as e:

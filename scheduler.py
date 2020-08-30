@@ -3,7 +3,7 @@ import requests
 import re
 import time
 import boto3
-
+import json
 from apscheduler.schedulers.background import BackgroundScheduler
 from botocore.exceptions import ClientError
 from datetime import datetime
@@ -36,14 +36,14 @@ def transactions_to_file(block):
     return file_name, tids
 
 
-def upload_block(file_name, object_name=None):
+def upload_block(file_name, object_name=None, bucket_name=cfg.BUCKET_NAME_BLOCKS):
     if object_name is None:
         object_name = file_name
 
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, cfg.BUCKET_NAME, object_name)
+        response = s3_client.upload_file(file_name, bucket_name, object_name)
     except ClientError as e:
         print(e)
         return False
@@ -55,6 +55,26 @@ def delete_transactions(tids):
     table = dynamodb.Table(cfg.TRANSACTION_TABLE)
     for tid in tids:
         table.delete_item(Key={'transaction_id': tid})
+
+
+def snapShot():
+    response = {"instances_list": get_instances()}
+    leader_cfg = cfg.config_to_dict()
+    # Save Leader cfg to json
+    saveFileToJson(leader_cfg, cfg.DNS)
+    upload_block(f"{cfg.LEADER_DNS}.json", bucket_name=cfg.BUCKET_NAME_STATE)
+
+    # Save instances configs to json
+    for instance in response["instances_list"]:
+        if instance['DNS'] is not cfg.LEADER_DNS:
+            res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
+            saveFileToJson(res, instance['DNS'])
+            upload_block(f"{instance['DNS']}.json", bucket_name=cfg.BUCKET_NAME_STATE)
+
+
+def saveFileToJson(config_file, fileName):
+    with open(f'{fileName}.json', 'w') as f:
+        json.dump(config_file, f, ensure_ascii=False)
 
 
 def add_block():
@@ -104,3 +124,4 @@ if __name__ == '__main__':
         sched.shutdown()
 else:
     sched.add_job(add_block, 'interval', minutes=1)
+    sched.add_job(snapShot, 'interval', seconds=5)
