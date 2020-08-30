@@ -18,7 +18,7 @@ def lambda_handler(event, context):
         response = s3.get_object(Bucket=bucket, Key=key)
         http = urllib3.PoolManager()
         http.request('POST',
-                     f"http://{dns_adress}:5000/updateblocks",
+                     f"http://{dns_adress}:5000/updateState",
                      body=json.dumps({'snapshot': key}),
                      headers={'Content-Type': 'application/json'},
                      retries=False)
