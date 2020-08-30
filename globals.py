@@ -28,6 +28,7 @@ class Config:
             "user_table": self.USER_TABLE
         }
 
+
 cfg = Config()
 
 

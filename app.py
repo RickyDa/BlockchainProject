@@ -36,8 +36,9 @@ def users():
         print(e)
         return Response(status=500)
 
+
 @app.route('/getState', methods=['GET'])
-def getState():
+def get_state():
     try:
         if request.method == 'GET':
             Response.data = cfg.config_to_json()
@@ -47,14 +48,22 @@ def getState():
         return Response(status=500)
 
 
+@app.route('/updateState', methods=['POST'])
+def update_state():
+    imd = request.json
+    with open("snapshot.txt", "a") as f:
+        f.write(f"{str(imd['snapshot'])}\n")
+    return Response(status=200)
+
+
 @app.route('/myTransactions', methods=['GET', 'POST'])
 def my_transactions():
     try:
         global user_email
         global user_logged_in
         if user_email is None:
-              flash(consts.MUST_LOGIN_MSG)
-              return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
+            flash(consts.MUST_LOGIN_MSG)
+            return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         # if this is post -> create new one, if this is get -> just show all my transactions
         if request.method == 'POST':
             # TODO: valid form + save the src as a global and not take it from the html!
@@ -62,8 +71,8 @@ def my_transactions():
             my_email = user_email
             amount = int(request.form['amount'])
             if user_logged_in.amount < amount:
-               flash(consts.NOT_ENOUGH_AMOUNT)
-               return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
+                flash(consts.NOT_ENOUGH_AMOUNT)
+                return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
             new_transaction = tc.Transaction(my_email, receiver_email, amount)
             save_transaction = tc.create_transaction(new_transaction)
             if save_transaction is None:
@@ -86,8 +95,8 @@ def transactions_to_sign():
         if user_logged_in is not None:
             user_email = user_logged_in.user_email
         if user_email is None:
-          flash(consts.MUST_LOGIN_MSG)
-          return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
+            flash(consts.MUST_LOGIN_MSG)
+            return render_template('myTransactions.html', transactions=tc.get_sigh_transactions(user_email))
         transactions = tc.get_transactions_by_dst(user_email)
         if transactions is None:
             flash(consts.TRANSACTIONS_TABLE_MSG)
@@ -246,32 +255,3 @@ def update():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=cfg.PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'
-
-# APP
-# Leader Election - ricky Done.
-# TODO:
-#   User API- dorel
-#   Transaction API - itay
-#   Client side - transcation - almost done :)
-#   master - Ricky
-#
-
-
-# Create user
-'''
-{
-	"user_email": "rickyrIckYY@mail.com",
-	"first_name":"ricky",
-	"last_name":"dani",
-	"ammount":3000,
-	"password": "123456789"
-}
-'''
-
-# login
-'''
-{
-    "user_email" : "ricky@gmail.com",
-    "password" : "1234567"
-}
-'''
