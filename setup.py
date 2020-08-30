@@ -6,16 +6,18 @@ INITIALIZE: BLOCKCHAIN NETWORK
 
 - 2 dynamodb
 - 1 SQS 
-- 1 S3 BUCKET
+- 2 S3 BUCKET
 - 5 INSTANCES
 """
 
 PORT = 5000
 TRANSACTION_LIMIT = 20
 Q_NAME = 'transactions'
-BUCKET_NAME = 'dsblocks'
+BUCKET_NAME_BLOCKS = 'dsblocks'
+BUCKET_NAME_STATE = 'dsstates'
 TRANSACTION_TABLE = 'transactions'
 USER_TABLE = 'users'
+
 
 NUM_INSTANCES = 5
 IMAGE_ID = "ami-04cfbd64f9364a31f"
@@ -89,8 +91,8 @@ if __name__ == "__main__":
     queue_name = Q_NAME
 
     region = 'eu-central-1'
-    blocks_bucket = BUCKET_NAME
-
+    blocks_bucket = BUCKET_NAME_BLOCKS
+    state_bucket = BUCKET_NAME_STATE
     transaction_table_name = TRANSACTION_TABLE
     transaction_keys = [('transaction_id', 'HASH', 'S')]  # (COL_NAME, KEY_TYPE, ATTR_TYPE)
 
@@ -99,6 +101,10 @@ if __name__ == "__main__":
 
     create_db(user_table_name, user_keys)
     create_db(transaction_table_name, transaction_keys)
+
     create_bucket(blocks_bucket, region)
+    create_bucket(state_bucket, region)
+
     create_sqs(queue_name)
+
     create_instances(num_instances=NUM_INSTANCES, image_id=IMAGE_ID, key_pem=KEY, sg=SECURITY_GROUPS)
