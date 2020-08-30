@@ -10,10 +10,6 @@ from datetime import datetime
 from globals import cfg
 from utils.utils import *
 
-# TRANSACTION_LIMIT = 20
-# Q_NAME = 'transactions'
-# BUCKET_NAME = 'dsblocks'
-
 sched = BackgroundScheduler()
 
 

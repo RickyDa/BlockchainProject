@@ -5,7 +5,7 @@ from logic import user_controller as uc, transaction_controller as tc
 from utils.utils import *
 from utils.validation import ensure_email_validation
 from globals import cfg, consts
-from scheduler import sched
+from logic.scheduler import sched
 
 app = Flask(__name__)
 app.secret_key = 'super secret key'
@@ -238,7 +238,6 @@ def elect():
     return Response(status=200)
 
 
-# sched.add_job(add_block, 'interval', minutes=1)
 sched.start()
 """
 ############################# LEADER ELECTION ###################################
