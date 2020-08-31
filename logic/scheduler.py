@@ -56,9 +56,8 @@ def delete_transactions(tids):
 
 def snapshot():
     if cfg.ID == cfg.LEADER_ID:
-        snap_date = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
+        snap_date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
         response = {"instances_list": get_instances()}
-        leader_cfg = cfg.config_to_dict()
         for instance in response["instances_list"]:
             file_name = f"snapshot_{snap_date}.json"
             try:
