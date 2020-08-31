@@ -10,7 +10,7 @@ class Config:
     DNS = get_public_DNS()
     Q_NAME = 'transactions'
     BUCKET_NAME_BLOCKS = 'dsblocks'
-    BUCKET_NAME_STATE = 'dsstates'
+    BUCKET_NAME_STATE = 'ds-states'
     TRANSACTION_TABLE = 'transactions'
     USER_TABLE = 'users'
 

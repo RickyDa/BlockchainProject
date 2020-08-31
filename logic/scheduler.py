@@ -56,21 +56,19 @@ def delete_transactions(tids):
 def snapshot():
     response = {"instances_list": get_instances()}
     leader_cfg = cfg.config_to_dict()
-    # Save Leader cfg to json
-    save_json_to_file(leader_cfg, cfg.DNS)
-    upload_block(f"{cfg.LEADER_DNS}.json", bucket_name=cfg.BUCKET_NAME_STATE)
-
-    # Save instances configs to json
     for instance in response["instances_list"]:
-        if instance['DNS'] is not cfg.LEADER_DNS:
-            res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
-            save_json_to_file(res, instance['DNS'])
-            upload_block(f"{instance['DNS']}.json", bucket_name=cfg.BUCKET_NAME_STATE)
+            try:
+              res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
+              save_json_to_file(res.json(), instance['DNS'])
+              upload_block(f"{instance['DNS']}.json", bucket_name=cfg.BUCKET_NAME_STATE)
+            except Exception as e:
+              print(e)
+            
 
 
-def save_json_to_file(config_file, file_name):
+def save_json_to_file(data, file_name):
     with open(f'{file_name}.json', 'w') as f:
-        json.dump(config_file, f, ensure_ascii=False)
+        json.dump(data, f, ensure_ascii=False)
 
 
 def add_block():
@@ -120,4 +118,4 @@ if __name__ == '__main__':
         sched.shutdown()
 else:
     sched.add_job(add_block, 'interval', minutes=1)
-    sched.add_job(snapshot, 'interval', seconds=5)
+    sched.add_job(snapshot, 'interval', seconds=30)

@@ -1,6 +1,6 @@
 import requests
 from flask import Flask, render_template, flash
-from flask import request, Response
+from flask import request, Response, jsonify
 from logic import user_controller as uc, transaction_controller as tc
 from utils.utils import *
 from utils.validation import ensure_email_validation
@@ -41,8 +41,8 @@ def users():
 def get_state():
     try:
         if request.method == 'GET':
-            Response.data = cfg.config_to_json()
-            return Response.data
+            d_cfg = cfg.config_to_dict()
+            return jsonify(d_cfg)
     except Exception as e:
         print(e)
         return Response(status=500)
