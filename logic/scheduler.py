@@ -21,15 +21,25 @@ def transactions_to_file(block):
     file_name = datetime.now().strftime("%m/%d/%Y_%H:%M:%S")
     file_name = f"{re.sub(r'[,/:]', '_', file_name)}.txt"
     tids = []
-    with open(file_name, "w") as f:
-        for b in block:
-            tid = b['transaction_id']['StringValue']
-            f.write(f"{tid}, \
-                    src: {b['src']['StringValue']}, \
-                    dst: {b['dst']['StringValue']}, \
-                    amount: {b['amount']['StringValue']}\n")
-            tids.append(tid)
-    return file_name, tids
+    data = []
+    for b in block:
+      body = {}
+      tid = b['transaction_id']['StringValue']
+      body['id'] = tid
+      body['src'] = b['src']['StringValue']
+      body['dst'] = b['dst']['StringValue']
+      body['amount'] = b['amount']['StringValue']
+      data.append(body)
+      tids.append(tid)
+    #with open(file_name, "w") as f:
+       # for b in block:
+       #     tid = b['transaction_id']['StringValue']
+        #    f.write(f"{tid}, \
+             #       src: {b['src']['StringValue']}, \
+             #       dst: {b['dst']['StringValue']}, \
+             #        {}\n")
+           # tids.append(tid)
+    return file_name, data, tids
 
 
 def upload_block(file_name, data, object_name=None, bucket_name=cfg.BUCKET_NAME_BLOCKS):
@@ -87,8 +97,8 @@ def add_block():
                 message_count += 1
 
         if message_count > 0:
-            block_name, tids = transactions_to_file(block)
-            upload_block(block_name)
+            block_name, data, tids = transactions_to_file(block)
+            upload_block(block_name, str(data).replace("[","").replace("]",""))
             # delete_transactions(tids) # uncomment if u want to delete signed transactions
             print(f"{message_count} TRANSACTIONS SIGNED TO BLOCK")
         else:
