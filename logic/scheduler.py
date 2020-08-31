@@ -115,4 +115,4 @@ if __name__ == '__main__':
         sched.shutdown()
 else:
     sched.add_job(add_block, 'interval', minutes=1)
-    sched.add_job(snapshot, 'interval', seconds=30)
+    # sched.add_job(snapshot, 'interval', seconds=30)
