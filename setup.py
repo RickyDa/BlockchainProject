@@ -14,10 +14,9 @@ PORT = 5000
 TRANSACTION_LIMIT = 20
 Q_NAME = 'transactions'
 BUCKET_NAME_BLOCKS = 'dsblocks'
-BUCKET_NAME_STATE = 'dsstates'
+BUCKET_NAME_STATE = 'ds-states'
 TRANSACTION_TABLE = 'transactions'
 USER_TABLE = 'users'
-
 
 NUM_INSTANCES = 5
 IMAGE_ID = "ami-04cfbd64f9364a31f"

@@ -48,3 +48,15 @@ def find_higher_ranks(nodes, my_rank):
             rv.append(node)
 
     return rv
+
+
+def download_file(bucket_name, file_name):
+    try:
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(bucket_name)
+        with open('last_snapshot.json', 'wb') as f:
+            bucket.download_fileobj(file_name, f)
+    except Exception as e:
+        print(e)
+        return False
+    return True

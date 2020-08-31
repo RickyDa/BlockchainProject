@@ -39,8 +39,8 @@ def upload_block(file_name, data, object_name=None, bucket_name=cfg.BUCKET_NAME_
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        
-        response = s3_client.put_object(Body=data, Bucket=bucket_name,Key=file_name)
+
+        response = s3_client.put_object(Body=data, Bucket=bucket_name, Key=file_name)
     except ClientError as e:
         print(e)
         return False
@@ -56,17 +56,17 @@ def delete_transactions(tids):
 
 def snapshot():
     if cfg.ID == cfg.LEADER_ID:
-      snap_date = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
-      response = {"instances_list": get_instances()}
-      leader_cfg = cfg.config_to_dict()
-      for instance in response["instances_list"]:
-              file_name = f"snapshot_{snap_date}.json"
-              try:
+        snap_date = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
+        response = {"instances_list": get_instances()}
+        leader_cfg = cfg.config_to_dict()
+        for instance in response["instances_list"]:
+            file_name = f"snapshot_{snap_date}.json"
+            try:
                 res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
                 upload_block(f"{instance['DNS']}/{file_name}", data=str(res.json()), bucket_name=cfg.BUCKET_NAME_STATE)
-              except Exception as e:
+            except Exception as e:
                 print(e)
-            
+
 
 def add_block():
     if cfg.ID == cfg.LEADER_ID:
@@ -114,5 +114,5 @@ if __name__ == '__main__':
         print('CRON TASK STOPPED')
         sched.shutdown()
 else:
-    sched.add_job(add_block, 'interval', minutes=1)
-    # sched.add_job(snapshot, 'interval', seconds=30)
+    sched.add_job(add_block, 'interval', minutes=10)
+    sched.add_job(snapshot, 'interval', minutes=20)

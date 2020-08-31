@@ -1,4 +1,6 @@
 import requests
+import sys
+import json
 from flask import Flask, render_template, flash
 from flask import request, Response, jsonify
 from logic import user_controller as uc, transaction_controller as tc
@@ -253,4 +255,17 @@ def update():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        var = sys.argv[1]
+        if var == 'snap':
+            with open('snapshot.txt', 'r') as f:
+                lines = f.read().splitlines()
+                last_line = lines[-1]
+            if download_file('ds-states', last_line):
+                with open('last_snapshot.json', 'r') as f:
+                    data = f.read()
+                json_acceptable_string = data.replace("'", "\"")
+                configurations = json.loads(json_acceptable_string)
+                cfg.set(configurations)
+
     app.run(host='0.0.0.0', port=cfg.PORT, threaded=True)  # on ec2 host='0.0.0.0', on local host='localhost'

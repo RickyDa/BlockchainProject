@@ -28,6 +28,18 @@ class Config:
             "user_table": self.USER_TABLE
         }
 
+    def set(self, d):
+        self.BUCKET_NAME_BLOCKS = d['bucket_name']
+        self.DNS = d['dns']
+        self.ID = d['id']
+        self.LEADER_DNS = d['leader_dns']
+        self.LEADER_ID = d['leader_id']
+        self.PORT = d['port']
+        self.Q_NAME = d['q_name']
+        self.TRANSACTION_LIMIT = d['transaction_limit']
+        self.TRANSACTION_TABLE = d['transaction_table']
+        self.USER_TABLE = d['user_table']
+
 
 cfg = Config()
 
