@@ -32,14 +32,15 @@ def transactions_to_file(block):
     return file_name, tids
 
 
-def upload_block(file_name, object_name=None, bucket_name=cfg.BUCKET_NAME_BLOCKS):
+def upload_block(file_name, data, object_name=None, bucket_name=cfg.BUCKET_NAME_BLOCKS):
     if object_name is None:
         object_name = file_name
 
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.put_object(Bucket=bucket_name,Key=file_name)
+        
+        response = s3_client.put_object(Body=data, Bucket=bucket_name,Key=file_name)
     except ClientError as e:
         print(e)
         return False
@@ -62,17 +63,10 @@ def snapshot():
               file_name = f"snapshot_{snap_date}.json"
               try:
                 res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
-                save_json_to_file(res.json(), file_name)
-                upload_block(f"{instance['DNS']}/{file_name}", bucket_name=cfg.BUCKET_NAME_STATE)
+                upload_block(f"{instance['DNS']}/{file_name}", data=str(res.json()), bucket_name=cfg.BUCKET_NAME_STATE)
               except Exception as e:
                 print(e)
             
-
-
-def save_json_to_file(data, file_name):
-    with open(file_name, 'w') as f:
-        json.dump(data, f, ensure_ascii=False)
-
 
 def add_block():
     if cfg.ID == cfg.LEADER_ID:
