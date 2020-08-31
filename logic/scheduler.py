@@ -39,7 +39,7 @@ def upload_block(file_name, object_name=None, bucket_name=cfg.BUCKET_NAME_BLOCKS
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, bucket_name, object_name)
+        response = s3_client.put_object(Bucket=bucket_name,Key=file_name)
     except ClientError as e:
         print(e)
         return False
@@ -54,20 +54,23 @@ def delete_transactions(tids):
 
 
 def snapshot():
-    response = {"instances_list": get_instances()}
-    leader_cfg = cfg.config_to_dict()
-    for instance in response["instances_list"]:
-            try:
-              res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
-              save_json_to_file(res.json(), instance['DNS'])
-              upload_block(f"{instance['DNS']}.json", bucket_name=cfg.BUCKET_NAME_STATE)
-            except Exception as e:
-              print(e)
+    if cfg.ID == cfg.LEADER_ID:
+      snap_date = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
+      response = {"instances_list": get_instances()}
+      leader_cfg = cfg.config_to_dict()
+      for instance in response["instances_list"]:
+              file_name = f"snapshot_{snap_date}.json"
+              try:
+                res = requests.get(f"http://{instance['DNS']}:{cfg.PORT}/getState")
+                save_json_to_file(res.json(), file_name)
+                upload_block(f"{instance['DNS']}/{file_name}", bucket_name=cfg.BUCKET_NAME_STATE)
+              except Exception as e:
+                print(e)
             
 
 
 def save_json_to_file(data, file_name):
-    with open(f'{file_name}.json', 'w') as f:
+    with open(file_name, 'w') as f:
         json.dump(data, f, ensure_ascii=False)
 
 
